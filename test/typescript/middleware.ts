@@ -1,28 +1,27 @@
 import {
   Middleware, MiddlewareAPI,
-  applyMiddleware, createStore, Dispatch, Reducer, Action
+  applyMiddleware, createStore, Dispatch, Reducer, Action,
+  StoreEnhancerStoreCreator
 } from "../../index.d.ts";
 
-declare module "../../index.d.ts" {
-    export interface Dispatch<S> {
-        <R>(asyncAction: (dispatch: Dispatch<S>, getState: () => S) => R): R;
-    }
+type ThunkAction<S, D extends Dispatch, R> = (dispatch: D & ThunkDispatch<S, D>, getState: () => S) => R;
+interface ThunkDispatch<S, D extends Dispatch> {
+    <R>(action: ThunkAction<S, D, R>): R;
 }
+type ThunkStoreEnhancer = <S, D extends Dispatch>(next: StoreEnhancerStoreCreator<S, D>) => StoreEnhancerStoreCreator<S, D & ThunkDispatch<S, D>>;
+type ThunkMiddleware<S, D extends Dispatch> = Middleware<ThunkDispatch<S, D>>
 
-type Thunk<S, O> = (dispatch: Dispatch<S>, getState: () => S) => O;
-
-const thunkMiddleware: Middleware =
-  <S>({dispatch, getState}: MiddlewareAPI<S>) =>
-    (next: Dispatch<S>) =>
-      <A extends Action, B>(action: A | Thunk<S, B>): B|Action =>
+const thunkMiddleware =
+  <S, D extends Dispatch>({dispatch, getState}: MiddlewareAPI<S, D>) =>
+    (next: D): D & ThunkDispatch<S, D> =>
+      (<A extends Action, B>(action: A | ThunkAction<S, D, B>): B|Action =>
         typeof action === 'function' ?
-          (<Thunk<S, B>>action)(dispatch, getState) :
-          next(<A>action)
+          (<ThunkAction<S, D, B>>action)(dispatch, getState) :
+          next(<A>action)) as any;
 
-
-const loggerMiddleware: Middleware =
-  <S>({getState}: MiddlewareAPI<S>) =>
-    (next: Dispatch<S>) =>
+const loggerMiddleware: Middleware<{}> =
+  <S, D extends Dispatch>({getState}: MiddlewareAPI<S, D>) =>
+    (next: D) =>
       (action: any): any => {
         console.log('will dispatch', action)
 
@@ -46,9 +45,12 @@ const reducer: Reducer<State> = (state: State, action: Action): State => {
   return state;
 }
 
-const storeWithThunkMiddleware = createStore(
+const thunkEnhancer = applyMiddleware(thunkMiddleware as ThunkMiddleware<State, Dispatch>); 
+const storeWithThunkMiddleware = createStore(reducer, thunkEnhancer);
+
+const storeWithLoggerMiddleware = createStore(
   reducer,
-  applyMiddleware(thunkMiddleware)
+  applyMiddleware(loggerMiddleware)
 );
 
 storeWithThunkMiddleware.dispatch(
@@ -58,8 +60,7 @@ storeWithThunkMiddleware.dispatch(
   }
 )
 
-
 const storeWithMultipleMiddleware = createStore(
   reducer,
-  applyMiddleware(loggerMiddleware, thunkMiddleware)
+  applyMiddleware(loggerMiddleware, thunkMiddleware as ThunkMiddleware<State, Dispatch>)
 )

@@ -17,6 +17,14 @@ To use it together with [Babel](http://babeljs.io), you will need to install `ba
 npm install --save-dev babel-register
 ```
 
+and configure it to use ES2015 features in `.babelrc`:
+
+```js
+{
+  "presets": ["es2015"]
+}
+```
+
 Then, add this to `scripts` in your `package.json`:
 
 ```js
@@ -112,7 +120,7 @@ import thunk from 'redux-thunk'
 import * as actions from '../../actions/counter'
 import * as types from '../../constants/ActionTypes'
 import nock from 'nock'
-import expect from 'expect'; // You can use any testing library
+import expect from 'expect' // You can use any testing library
 
 const middlewares = [ thunk ]
 const mockStore = configureMockStore(middlewares)
@@ -122,7 +130,7 @@ describe('async actions', () => {
     nock.cleanAll()
   })
 
-  it('creates FETCH_TODOS_SUCCESS when fetching todos has been done', (done) => {
+  it('creates FETCH_TODOS_SUCCESS when fetching todos has been done', () => {
     nock('http://example.com/')
       .get('/todos')
       .reply(200, { body: { todos: ['do something'] }})
@@ -133,12 +141,10 @@ describe('async actions', () => {
     ]
     const store = mockStore({ todos: [] })
 
-    store.dispatch(actions.fetchTodos())
+    return store.dispatch(actions.fetchTodos())
       .then(() => { // return of async actions
         expect(store.getActions()).toEqual(expectedActions)
       })
-      .then(done) // test passed
-      .catch(done) // test failed
   })
 })
 ```
@@ -406,7 +412,7 @@ import { connect } from 'react-redux'
 export class App extends Component { /* ... */ }
 
 // Use default export for the connected component (for app)
-export default connect(mapDispatchToProps)(App)
+export default connect(mapStateToProps)(App)
 ```
 
 Since the default export is still the decorated component, the import statement pictured above will work as before so you won’t have to change your application code. However, you can now import the undecorated `App` components in your test file like this:
@@ -456,7 +462,7 @@ const dispatchWithStoreOf = (storeData, action) => {
   const dispatch = singleDispatch(createFakeStore(storeData))(actionAttempt => dispatched = actionAttempt)
   dispatch(action)
   return dispatched
-};
+}
 
 describe('middleware', () => {
   it('should dispatch if store is empty', () => {
@@ -489,4 +495,4 @@ describe('middleware', () => {
 
 - [jsdom](https://github.com/tmpvar/jsdom): A plain JavaScript implementation of the DOM API. jsdom allows us to run the tests without browser.
 
-- [Shallow rendering](http://facebook.github.io/react/docs/test-utils.html#shallow-rendering): Shallow rendering lets you instantiate a component and get the result of its `render` method just a single level deep instead of rendering components recursively to a DOM. The result of shallow rendering is a [ReactElement](https://facebook.github.io/react/docs/glossary.html#react-elements). That means it is possible to access its children, props and test if it works as expected. This also means that you changing a child component won’t affect the tests for parent component.
+- [Shallow rendering](http://facebook.github.io/react/docs/test-utils.html#shallow-rendering): Shallow rendering lets you instantiate a component and get the result of its `render` method just a single level deep instead of rendering components recursively to a DOM. The result of shallow rendering is a [ReactElement](https://facebook.github.io/react/docs/glossary.html#react-elements). That means it is possible to access its children, props and test if it works as expected. This also means that changing a child component won’t affect the tests for parent component.

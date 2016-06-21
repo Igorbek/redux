@@ -188,7 +188,7 @@ export interface Store<S, D extends Dispatch> {
 /**
  * A store creator is a function that creates a Redux store. Like with
  * dispatching function, we must distinguish the base store creator,
- * `createStore(reducer, initialState)` exported from the Redux package, from
+ * `createStore(reducer, preloadedState)` exported from the Redux package, from
  * store creators that are returned from the store enhancers.
  *
  * @template S State object type.
@@ -236,7 +236,7 @@ export type StoreEnhancerStoreCreator<S, D extends Dispatch> = (reducer: Reducer
  * @param reducer A function that returns the next state tree, given the
  *   current state tree and the action to handle.
  *
- * @param [initialState] The initial state. You may optionally specify it to
+ * @param [preloadedState] The initial state. You may optionally specify it to
  *   hydrate the state from the server in universal apps, or to restore a
  *   previously serialized user session. If you use `combineReducers` to
  *   produce the root reducer function, this must be an object with the same

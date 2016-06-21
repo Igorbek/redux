@@ -17,7 +17,7 @@ const reducer: Reducer<State> = (state: State, action: Action): State => {
 
 const store = createStore<State>(reducer);
 
-const storeWithInitialState = createStore(reducer, {
+const storeWithPreloadedState: Store<State, Dispatch> = createStore(reducer, {
   todos: []
 });
 
@@ -27,7 +27,7 @@ const specificEnhencer: StoreEnhancer<State, Dispatch, Dispatch> = next => next;
 const storeWithGenericEnhancer: Store<State, Dispatch> = createStore(reducer, genericEnhancer);
 const storeWithSpecificEnhancer: Store<State, Dispatch> = createStore(reducer, specificEnhencer);
 
-const storeWithInitialStateAndEnhancer: Store<State, Dispatch> = createStore(reducer, {
+const storeWithPreloadedStateAndEnhancer: Store<State, Dispatch> = createStore(reducer, {
   todos: []
 }, genericEnhancer);
 

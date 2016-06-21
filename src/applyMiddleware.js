@@ -17,9 +17,9 @@ import compose from './compose'
  * @returns {Function} A store enhancer applying the middleware.
  */
 export default function applyMiddleware(...middlewares) {
-  return (createStore) => (reducer, initialState, enhancer) => {
-    var store = createStore(reducer, initialState, enhancer)
-    var dispatch
+  return (createStore) => (reducer, preloadedState, enhancer) => {
+    var store = createStore(reducer, preloadedState, enhancer)
+    var dispatch = store.dispatch
     var chain = []
 
     var middlewareAPI = {
